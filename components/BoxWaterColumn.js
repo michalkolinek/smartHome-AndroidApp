@@ -12,7 +12,7 @@ export default class BoxWaterColumn extends Component {
         value: PropTypes.object,
         period: PropTypes.string,
         unit: PropTypes.string
-    };
+    };pac
     static defaultProps = {
         period: 'hour',
         unit: 'mm/h'
@@ -20,7 +20,8 @@ export default class BoxWaterColumn extends Component {
 
     render() {
         if(this.props.value !== null && this.props.value[this.props.period] !== null) {
-            const value = Math.round(this.props.value[this.props.period] * 100) / 100;
+            const magnitude = this.props.value[this.props.period] >= 10 ? 10 : 100;
+            const value = Math.round(this.props.value[this.props.period] * magnitude) / magnitude;
             return (
                 <View style={[styles.box, styles.boxBlue]}>
                     <Icon name="water" color={common.colors.blue} size={28} />

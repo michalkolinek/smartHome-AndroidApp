@@ -141,7 +141,7 @@ export default class App extends Component {
         this.client.on('connectionLost', (responseObject) => this.handleConnectionLost(responseObject));
         this.client.on('messageReceived', (message) => this.handleMessage(message));
         this.connect(false);
-//        this.registerFCM();
+        this.registerFCM();
 	}
 
 	connect(isReconnect) {
@@ -293,10 +293,15 @@ export default class App extends Component {
 //				}
 				break;
 			case 'smarthome/pool':
-			    const filtering = controls.findIndex((item) => item.id == 'filtering');
-			    const heating = controls.findIndex((item) => item.id == 'heating');
-                controls[filtering].status = data.filtering;
-                controls[heating].status = data.heating;
+			    if(data.temp) {
+			        i = nodes.findIndex((item) => item.id == 'pool');
+			        nodes[i].temp = data.temp;
+			    } else {
+			        const filtering = controls.findIndex((item) => item.id == 'filtering');
+                    const heating = controls.findIndex((item) => item.id == 'heating');
+                    controls[filtering].status = data.filtering;
+                    controls[heating].status = data.heating;
+			    }
                 break;
 			default:
 			    const topic = message.destinationName.replace('smarthome/', '');
@@ -451,6 +456,7 @@ export default class App extends Component {
                 renderScene={scene}
                 renderTabBar={(props) => this.renderTabBar(props)}
                 onIndexChange={index => this.handleTabChange(index)}
+                swipeEnabled={true}
                 initialLayout={{
                     width: Dimensions.get('window').width,
                     height: 500

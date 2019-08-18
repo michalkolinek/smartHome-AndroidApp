@@ -22,7 +22,7 @@ export default class OutsideBox extends NodeBox {
             </View>,
             <View style={styles.data} key={'row-3'}>
                  <BoxWaterColumn key="rainHour" value={this.props.node.waterColumn} />
-                 <BoxWaterColumn key="rainDay" value={this.props.node.waterColumn} period="day" unit="mm/den" />
+                 <BoxWaterColumn key="rainDay" value={this.props.node.waterColumn} period="day" unit="mm/d" />
             </View>
         ];
     }
