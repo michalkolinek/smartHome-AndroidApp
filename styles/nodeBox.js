@@ -39,7 +39,8 @@ export default StyleSheet.create({
 
 	title: {
 	    color: common.colors.darkGray,
-	    fontSize: 24
+	    fontSize: 24,
+	    paddingLeft: 12
 	},
 
 	diode: {

@@ -9,7 +9,6 @@ export default class Feed extends Component {
     static propTypes = {
         nodes: PropTypes.array.isRequired,
         pending: PropTypes.bool,
-        onRefresh: PropTypes.func.isRequired,
         onCommand: PropTypes.func.isRequired,
         onWashmachineAck: PropTypes.func
     };

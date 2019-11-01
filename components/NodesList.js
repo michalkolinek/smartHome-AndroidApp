@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { FlatList, View, RefreshControl } from 'react-native';
+import { FlatList, View } from 'react-native';
 import TempHumBox from './TempHumBox';
 import WashmachineBox from './WashmachineBox';
 import SprinklersBox from './SprinklersBox';
@@ -9,6 +9,7 @@ import PoolBox from './PoolBox';
 import OutsideBox from './OutsideBox';
 import FilteringBox from './FilteringBox';
 import HeatingBox from './HeatingBox';
+import BlindsBox from './BlindsBox';
 import styles from '../styles/nodesList';
 
 export default class NodesList extends Component {
@@ -16,7 +17,6 @@ export default class NodesList extends Component {
     static propTypes = {
         nodes: PropTypes.array.isRequired,
         pending: PropTypes.bool,
-        onRefresh: PropTypes.func.isRequired,
         onCommand: PropTypes.func.isRequired,
         onWashmachineAck: PropTypes.func
     }
@@ -35,7 +35,7 @@ export default class NodesList extends Component {
             case 'fan' :
                 return <FanBox node={node.item} index={node.index}
                             onCommand={(param) => this.props.onCommand('fan', param)} />
-            case 'pool' :
+            case 'poolWater' :
                 return <PoolBox node={node.item} index={node.index} />
             case 'heating' :
                 return <HeatingBox node={node.item} index={node.index}
@@ -45,6 +45,10 @@ export default class NodesList extends Component {
                             onCommand={(param) => this.props.onCommand('pool', {action: 'filtering', status: param})}/>
             case 'outside' :
                 return <OutsideBox node={node.item} index={node.index} />
+            case 'blinds' :
+                return <BlindsBox node={node.item} index={node.index}
+                            onCommand={(param) => this.props.onCommand('blinds', {...param})}/>
+
             default :
                 return <TempHumBox node={node.item} index={node.index} />
         }
@@ -60,12 +64,6 @@ export default class NodesList extends Component {
         return (
             <FlatList data={this.props.nodes}
                 style={styles.container}
-                refreshControl={
-                      <RefreshControl
-                        refreshing={this.props.pending}
-                        onRefresh={() => this.props.onRefresh()}
-                      />
-                }
                 ItemSeparatorComponent={(index) => this.renderSeparator(index)}
                 keyExtractor={(node) => node.id}
                 renderItem={(node) => this.renderNode(node)} />

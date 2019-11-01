@@ -82,7 +82,7 @@ export default class App extends Component {
                     time: null,
                     supplyV: null
                 },  {
-                    id: 'pool',
+                    id: 'poolWater',
                     title: 'Bazén',
                     temp: null,
                     time: null,
@@ -113,7 +113,17 @@ export default class App extends Component {
                     title: 'Větrání',
                     status: null,
                     supplyV: null
-                },
+                }, {
+                     id: 'blinds',
+                     title: 'Žaluzie',
+                     rooms: [{
+                        id: 'office',
+                        title: 'Pracovna',
+                        position: 0,
+                        angle: 0,
+                        moving: false
+                     }]
+                 },
 			],
 			tabs: {
 			    index: 0,
@@ -163,6 +173,7 @@ export default class App extends Component {
                 this.handleConnected();
             })
             .catch((error) => {
+            console.log(error);
                 this.setState({status: 'offline'});
                 setTimeout(() => {
                     this.connect(true)
@@ -171,16 +182,8 @@ export default class App extends Component {
         }
 	}
 
-	disconnect() {
-		if(this.state.status == 'connected') {
-			this.client.disconnect();
-		}
-		this.setState({status: 'disconnected'});
-	}
-
 	reconnect() {
 	    this.setState({pending: true}, () => {
-            this.disconnect();
             this.connect(true);
 	    });
 	}
@@ -245,8 +248,6 @@ export default class App extends Component {
 		switch(message.destinationName) {
 			case 'smarthome/outside':
 				i = nodes.findIndex((item) => item.id == 'outside');
-				nodes[i].temp = data.temp;
-				nodes[i].hum = data.hum;
 				j = nodes.findIndex((item) => item.id == 'sprinklers');
                 nodes[j].moist = data.moist;
                 if(data.time) {
@@ -270,8 +271,6 @@ export default class App extends Component {
                 break;
 			case 'smarthome/office':
                 i = nodes.findIndex((item) => item.id == 'office');
-                nodes[i].temp = data.temp;
-                nodes[i].hum = data.hum;
                 j = nodes.findIndex((item) => item.id == 'outside');
                 nodes[j].press = data.press;
                 if(data.time) {
@@ -292,33 +291,32 @@ export default class App extends Component {
 //				    nodes[i].status = data.status;
 //				}
 				break;
+			case 'smarthome/poolWater':
+                i = nodes.findIndex((item) => item.id == 'poolWater');
 			case 'smarthome/pool':
-			    if(data.temp) {
-			        i = nodes.findIndex((item) => item.id == 'pool');
-			        nodes[i].temp = data.temp;
-			    } else {
-			        const filtering = controls.findIndex((item) => item.id == 'filtering');
-                    const heating = controls.findIndex((item) => item.id == 'heating');
-                    controls[filtering].status = data.filtering;
-                    controls[heating].status = data.heating;
-			    }
+                const filtering = controls.findIndex((item) => item.id == 'filtering');
+                const heating = controls.findIndex((item) => item.id == 'heating');
+                controls[filtering].status = data.filtering;
+                controls[heating].status = data.heating;
+                break;
+            case 'smarthome/blinds':
+                console.log('smarthome/blinds', data);
+                i = controls.findIndex((item) => item.id == 'blinds');
+                const r = controls[i].rooms.findIndex((room) => room.id == data.room);
+                controls[i].rooms[r].position = data.status.position;
+                controls[i].rooms[r].angle = data.status.angle;
+                controls[i].rooms[r].moving = data.status.moving;
                 break;
 			default:
 			    const topic = message.destinationName.replace('smarthome/', '');
                 i = nodes.findIndex((item) => item.id == topic);
-
-                if(i > -1) {
-                    nodes[i].temp = data.temp;
-                    nodes[i].hum = data.hum;
-                }
 		}
 
-		if(i > -1 && data.supplyV) {
-			nodes[i].supplyV = data.supplyV;
-		}
-
-		if(i > -1 && data.time) {
-        	nodes[i].time = data.time;
+        if(i > -1) {
+            if(data.temp) nodes[i].temp = data.temp;
+            if(data.hum) nodes[i].hum = data.hum;
+            if(data.supplyV) nodes[i].supplyV = data.supplyV;
+            if(data.time) nodes[i].time = data.time;
         }
 
 		this.setState({status: 'receiving', pending: false, nodes, controls});
@@ -433,7 +431,6 @@ export default class App extends Component {
                 case 'feed':
                     return <Feed {...this.props}
                                 nodes={this.state.nodes}
-                                onRefresh={() => this.reconnect()}
                                 onWashmachineAck={() => this.handleWashmachineAck()}
                                 onCommand={(node, param) => this.handleCommand(node, param)} />;
                 case 'stats':
@@ -443,7 +440,6 @@ export default class App extends Component {
                 case 'controls':
                     return <Feed {...this.props}
                                nodes={this.state.controls}
-                               onRefresh={() => this.reconnect()}
                                onCommand={(node, param) => this.handleCommand(node, param)} />;
                 default:
                     return null;
