@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "clone": "^2.1.2",
-    "moment": "^2.23.0",
+    "moment": "^2.29.4",
     "prop-types": "^15.6.2",
     "react": "16.8.6",
     "react-native": "0.60.4",
